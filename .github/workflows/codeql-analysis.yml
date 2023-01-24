@@ -44,10 +44,8 @@ jobs:
       shell: pwsh
       run: |
         remove-item -path .\src\Wix\nuget.config -force -verbose
-        dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/DarkgreyDevelopment/index.json"
-
-    - name: Restore NuGet Packages
-      run: nuget restore src\Wix\CustomActions.csproj
+        nuget Sources Add -Name "github" -Source "https://nuget.pkg.github.com/DarkgreyDevelopment/index.json" -UserName "${{ github.actor }}" -Password "${{ secrets.GITHUB_TOKEN }}"
+        nuget restore src\Wix\CustomActions.csproj
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
