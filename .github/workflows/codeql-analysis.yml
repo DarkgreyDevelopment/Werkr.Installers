@@ -43,6 +43,7 @@ jobs:
     - name: Auth to github nuget feed.
       shell: pwsh
       run: |
+        remove-item -path .\src\Wix\nuget.config -force -verbose
         dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/DarkgreyDevelopment/index.json"
 
     - name: Restore NuGet Packages
