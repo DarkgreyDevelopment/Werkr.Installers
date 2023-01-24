@@ -11,7 +11,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       actions: read
       contents: read
@@ -23,7 +23,18 @@ jobs:
         language: [ 'csharp' ]
 
     steps:
-    - name: Checkout repository
+    - name: Install GitVersion
+      uses: GitTools/actions/gitversion/setup@v0.9.15
+      with:
+        versionSpec: '5.x'
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+
+    - name: Check out repository code
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
@@ -34,18 +45,15 @@ jobs:
       run: |
         dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/DarkgreyDevelopment/index.json"
 
+    - name: Restore NuGet Packages
+      run: nuget restore src\Wix\CustomActions.csproj
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
         queries: security-extended,security-and-quality
-
-    # Install GitVersion so Autobuild will work.
-    - name: Install GitVersion
-      uses: GitTools/actions/gitversion/setup@v0.9.15
-      with:
-        versionSpec: '5.x'
 
     - name: Autobuild
       uses: github/codeql-action/autobuild@v2
