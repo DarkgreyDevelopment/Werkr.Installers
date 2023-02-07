@@ -22,6 +22,11 @@ jobs:
       matrix:
         language: [ 'csharp' ]
 
+    - name: Check out repository code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
     steps:
     - name: Install GitVersion
       uses: GitTools/actions/gitversion/setup@v0.9.15
@@ -30,12 +35,8 @@ jobs:
 
     - name: Install dotnet 4.8.1 sdk
       shell: pwsh
-      run: choco install netfx-4.8.1-devpack
-
-    - name: Check out repository code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      run: |
+        dotnet --version
 
     - name: Use dotnet to auth to the github nuget feed.
       shell: pwsh
