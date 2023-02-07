@@ -37,7 +37,7 @@ jobs:
       shell: pwsh
       run: |
         remove-item -path .\src\Wix\nuget.config -force -verbose
-        dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github'
+        dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github' -u '${{ github.actor }}' -p '${{ secrets.PACKAGES_READ_KEY }}'
 
     - name: Restore Wix CustomActions Project
       shell: pwsh
