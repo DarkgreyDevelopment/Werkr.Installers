@@ -45,6 +45,11 @@ jobs:
       run: |
         remove-item -path .\src\Wix\nuget.config -force -verbose
         nuget Sources Add -Name "github" -Source "https://nuget.pkg.github.com/DarkgreyDevelopment/index.json" -UserName "${{ github.actor }}" -Password "${{ secrets.GITHUB_TOKEN }}"
+
+    # Auth to github nuget so we can resolve dependencies.
+    - name: Restore Wix CustomActions Project
+      shell: pwsh
+      run: |
         nuget restore src\Wix\CustomActions.csproj
 
     # Initializes the CodeQL tools for scanning.
