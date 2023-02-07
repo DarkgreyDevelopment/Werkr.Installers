@@ -28,11 +28,9 @@ jobs:
       with:
         versionSpec: '5.x'
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: |
-          4.8.x
+    - name: Install dotnet 4.8.1 sdk
+      shell: pwsh
+      run: choco install netfx-4.8.1-devpack
 
     - name: Check out repository code
       uses: actions/checkout@v3
