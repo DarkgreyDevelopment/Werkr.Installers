@@ -64,11 +64,11 @@ jobs:
           </package>
           "@ | Out-File '.\Publish\Werkr.Installers.Wix.CustomActions.CA.nuspec'
           nuget pack 'Publish\Werkr.Installers.Wix.CustomActions.CA.nuspec'
-          dotnet nuget remove source github
-          dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json'  -n 'github' -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
 
       - name: Publish library to github nuget Feed.
         shell: pwsh
         run: |
           Set-Location './src/Wix'
+          dotnet nuget remove source github
+          dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json'  -n 'github' -u ${{ github.actor }} -p ${{ secrets.PACKAGES_WRITE_KEY }} --store-password-in-clear-text
           dotnet nuget push 'Werkr.Installers.Wix.CustomActions.CA.*.nupkg' --source 'github' --skip-duplicate
