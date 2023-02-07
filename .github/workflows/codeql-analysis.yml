@@ -22,12 +22,13 @@ jobs:
       matrix:
         language: [ 'csharp' ]
 
+    steps:
+
     - name: Check out repository code
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    steps:
     - name: Install GitVersion
       uses: GitTools/actions/gitversion/setup@v0.9.15
       with:
