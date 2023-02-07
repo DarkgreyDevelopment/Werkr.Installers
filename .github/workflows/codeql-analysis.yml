@@ -11,7 +11,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: windows-latest
+    runs-on: windows-2019
     permissions:
       actions: read
       contents: read
@@ -28,29 +28,27 @@ jobs:
       with:
         versionSpec: '5.x'
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1.3
-
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.1.1
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: |
+          4.8.x
 
     - name: Check out repository code
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    # Auth to github nuget so we can resolve dependencies.
-    - name: Auth to github nuget feed.
+    - name: Use dotnet to auth to the github nuget feed.
       shell: pwsh
       run: |
         remove-item -path .\src\Wix\nuget.config -force -verbose
-        nuget Sources Add -Name "github" -Source "https://nuget.pkg.github.com/DarkgreyDevelopment/index.json" -UserName "${{ github.actor }}" -Password "${{ secrets.GITHUB_TOKEN }}"
+        dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github' -u '${{ github.actor }}' -p '${{ secrets.GITHUB_TOKEN }}'
 
-    # Auth to github nuget so we can resolve dependencies.
     - name: Restore Wix CustomActions Project
       shell: pwsh
       run: |
-        nuget restore src\Wix\CustomActions.csproj
+        dotnet restore src\Wix\CustomActions.csproj
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
