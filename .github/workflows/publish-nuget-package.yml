@@ -71,4 +71,4 @@ jobs:
           Set-Location './src/Wix'
           dotnet nuget remove source github
           dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github'  -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-          dotnet nuget push 'Werkr.Installers.Wix.CustomActions.CA.nupkg' --source 'github' --skip-duplicate
+          dotnet nuget push 'Werkr.Installers.Wix.CustomActions.CA.*.nupkg' --source 'github' --skip-duplicate
