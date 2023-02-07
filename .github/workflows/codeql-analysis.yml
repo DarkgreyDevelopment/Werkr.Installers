@@ -23,7 +23,6 @@ jobs:
         language: [ 'csharp' ]
 
     steps:
-
     - name: Check out repository code
       uses: actions/checkout@v3
       with:
@@ -34,20 +33,16 @@ jobs:
       with:
         versionSpec: '5.x'
 
-    - name: Install dotnet 4.8.1 sdk
-      shell: pwsh
-      run: |
-        dotnet --version
-
     - name: Use dotnet to auth to the github nuget feed.
       shell: pwsh
       run: |
         remove-item -path .\src\Wix\nuget.config -force -verbose
-        dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github' -u '${{ github.actor }}' -p '${{ secrets.GITHUB_TOKEN }}'
+        dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github'
 
     - name: Restore Wix CustomActions Project
       shell: pwsh
       run: |
+        dotnet --info
         dotnet restore src\Wix\CustomActions.csproj
 
     # Initializes the CodeQL tools for scanning.
