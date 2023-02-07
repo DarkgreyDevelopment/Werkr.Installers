@@ -4,7 +4,7 @@
     <PackageId>Werkr.Installers.Wix.CustomActions</PackageId>
     <Company>Darkgrey Development</Company>
     <Authors>Taylor Marvin</Authors>
-    <PackageDescription>A shared Wix CustomAction library for the Werkr task automation projects.</PackageDescription>
+    <PackageDescription>A shared Wix CustomAction library for the Werkr task automation projects. Used in the Msi install process.</PackageDescription>
     <RepositoryUrl>https://github.com/DarkgreyDevelopment/Werkr.Installers</RepositoryUrl>
     <TargetFramework>net48</TargetFramework>
     <DebugType>embedded</DebugType>

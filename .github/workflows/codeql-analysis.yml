@@ -41,9 +41,7 @@ jobs:
 
     - name: Restore Wix CustomActions Project
       shell: pwsh
-      run: |
-        dotnet --info
-        dotnet restore src\Wix\CustomActions.csproj
+      run: dotnet restore src\Wix\CustomActions.csproj
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
