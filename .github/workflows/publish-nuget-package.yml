@@ -69,5 +69,5 @@ jobs:
         shell: pwsh
         run: |
           Set-Location './src/Wix'
-          dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github-push'  -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-          dotnet nuget push 'Werkr.Installers.Wix.CustomActions.CA.nupkg' --source 'github-push' --skip-duplicate
+          dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'githubpush'  -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push 'Werkr.Installers.Wix.CustomActions.CA.nupkg' --source 'githubpush' --skip-duplicate
