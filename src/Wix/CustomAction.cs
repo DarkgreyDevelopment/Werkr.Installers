@@ -24,7 +24,8 @@ namespace Werkr.Installers.Wix {
         public static ActionResult OpenCertDetails( Session session ) {
             try {
                 OpenCertStoreDetailsTable( session );
-            } catch (Exception) {
+            } catch (Exception e) {
+                session.Log( $"An exception has occurred while opening the OpenCertStoreDetailsTable form. Error: {e.Message}" );
                 return ActionResult.Failure;
             }
             return ActionResult.Success;
@@ -38,7 +39,8 @@ namespace Werkr.Installers.Wix {
         public static ActionResult OpenCertFileCertPath( Session session ) {
             try {
                 session["HTTPSINLINECERTFILE.CERTPATH"] = OpenCertificateFile( );
-            } catch (Exception) {
+            } catch (Exception e) {
+                session.Log( $"An exception has occurred while opening the OpenCertFileCertPath file prompt. Error: {e.Message}" );
                 return ActionResult.Failure;
             }
             return ActionResult.Success;
@@ -52,7 +54,8 @@ namespace Werkr.Installers.Wix {
         public static ActionResult OpenCertAndKeyFileCertPath( Session session ) {
             try {
                 session["HTTPSINLINECERTANDKEYFILE.CERTPATH"] = OpenCertificateFile( );
-            } catch (Exception) {
+            } catch (Exception e) {
+                session.Log( $"An exception has occurred while opening the OpenCertAndKeyFileCertPath file prompt. Error: {e.Message}" );
                 return ActionResult.Failure;
             }
             return ActionResult.Success;
@@ -66,7 +69,8 @@ namespace Werkr.Installers.Wix {
         public static ActionResult OpenCertAndKeyFileKeyPath( Session session ) {
             try {
                 session["HTTPSINLINECERTANDKEYFILE.KEYPATH"] = OpenKeyFile( );
-            } catch (Exception) {
+            } catch (Exception e) {
+                session.Log( $"An exception has occurred while opening the CertAndKeyFileKeyPath file prompt. Error: {e.Message}" );
                 return ActionResult.Failure;
             }
             return ActionResult.Success;
@@ -79,7 +83,8 @@ namespace Werkr.Installers.Wix {
         public static ActionResult OpenShellDir( Session session ) {
             try {
                 session["SHELLWORKINGDIR"] = OpenFolderDialog( "Shell Working Directory:" );
-            } catch (Exception) {
+            } catch (Exception e) {
+                session.Log( $"An exception has occurred while opening the shell working directory prompt. Error: {e.Message}" );
                 return ActionResult.Failure;
             }
             return ActionResult.Success;
@@ -119,7 +124,8 @@ namespace Werkr.Installers.Wix {
                 session["CompletedAppSettingsJson"] = jsonString;
 
                 session.Log( "End ConvertPropertiesToCompletedAppSettingsJson" );
-            } catch (Exception) {
+            } catch (Exception e) {
+                session.Log( $"An exception has occurred while converting msi properties to appsettings json. Error: {e.Message}" );
                 return ActionResult.Failure;
             }
             return ActionResult.Success;
@@ -150,7 +156,8 @@ namespace Werkr.Installers.Wix {
                 session.Log( $"Saved updated appsettings file to '{appSettingsPath}'." );
 
                 session.Log( "End ConfigSaveExec" );
-            } catch (Exception) {
+            } catch (Exception e) {
+                session.Log( $"An exception has occurred while saving configuration details. Error: {e.Message}" );
                 return ActionResult.Failure;
             }
             return ActionResult.Success;
@@ -423,31 +430,33 @@ namespace Werkr.Installers.Wix {
             return folderPath;
         }
 
-        private static IEnumerable<StoreDetails> GetCertificateStoreDetails( ) {
+        private static IEnumerable<StoreDetails> GetCertificateStoreDetails( Session session ) {
             StoreLocation[] storeLocations = (StoreLocation[])Enum.GetValues( typeof( StoreLocation ) );
             List<StoreDetails> details = new List<StoreDetails>();
 
             foreach (StoreLocation storeLocation in storeLocations) {
                 foreach (StoreName storeName in (StoreName[])Enum.GetValues( typeof( StoreName ) )) {
-                    X509Store store = new X509Store(storeName, storeLocation);
-                    try {
-                        store.Open( OpenFlags.OpenExistingOnly );
-                        details.Add(
-                            new StoreDetails( ) {
-                                Name = store.Name,
-                                CertificateCount = store.Certificates.Count,
-                                Location = store.Location
-                            }
-                        );
-                    } catch (CryptographicException) {
-                        // Store Location does not exist
+                    using (X509Store store = new X509Store( storeName, storeLocation )) {
+                        try {
+                            store.Open( OpenFlags.OpenExistingOnly );
+                            details.Add(
+                                new StoreDetails( ) {
+                                    Name = store.Name,
+                                    CertificateCount = store.Certificates.Count,
+                                    Location = store.Location
+                                }
+                            );
+                        } catch (CryptographicException e) {
+                            // Store Location likely does not exist.
+                            session.Log( $"An exception has occurred while retrieving certificate store details. Error: {e.Message}" );
+                        }
                     }
                 }
             }
             return details;
         }
 
-        private static IEnumerable<CertDetails> GetCertificateDetails( IEnumerable<StoreDetails> storeDetails ) {
+        private static IEnumerable<CertDetails> GetCertificateDetails( IEnumerable<StoreDetails> storeDetails, Session session ) {
             List<CertDetails> details = new List<CertDetails>();
             foreach (StoreDetails storeDetailItem in storeDetails) {
                 string storeName = storeDetailItem.Name;
@@ -470,8 +479,8 @@ namespace Werkr.Installers.Wix {
                     }
                     store.Close( );
                 } catch (Exception ex) {
-                    _ = MessageBox.Show(
-                          "An error occurred while populating details about the Certificate Store.\r\n"
+                    session.Log(
+                        "An error occurred while populating details about the Certificate Store.\r\n"
                         + $"ExceptionType: {ex.GetType( ).FullName}\r\n"
                         + $"Store: {storeName}, Location: {location}\r\n"
                         + $"Message: {ex.Message}\r\n"
@@ -539,8 +548,8 @@ namespace Werkr.Installers.Wix {
 
         private static void OpenCertStoreDetailsTable( Session session ) {
             Thread task = new Thread(() => {
-                IEnumerable<StoreDetails> storeDetails = GetCertificateStoreDetails( );
-                IEnumerable<CertDetails> certDetails  = GetCertificateDetails( storeDetails );
+                IEnumerable<StoreDetails> storeDetails = GetCertificateStoreDetails( session );
+                IEnumerable<CertDetails> certDetails  = GetCertificateDetails( storeDetails, session );
                 DataGridView certGrid = CreateCertificateTable( certDetails );
                 SaveCertificateStoreDetails(session, certGrid );
             });
