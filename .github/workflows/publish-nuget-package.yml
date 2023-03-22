@@ -1,0 +1,74 @@
+name: Publish Nuget Package
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-push-nuget-package:
+    runs-on: windows-2019
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.1.1
+
+      - name: Install GitVersion
+        uses: GitTools/actions/gitversion/setup@v0.9.15
+        with:
+          versionSpec: '5.x'
+
+      - name: Auth to github nuget feed.
+        shell: pwsh
+        run: |
+          remove-item -path .\src\Wix\nuget.config -force -verbose # Remove example nuget config.
+          dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github' -u '${{ github.actor }}' -p '${{ secrets.PACKAGES_READ_KEY }}'
+
+      - name: Build and Pack library
+        shell: pwsh
+        run: |
+          Set-Location './src/Wix'
+          $LibPath = '.\Publish\lib\net48'
+          New-Item -Path $LibPath -ItemType 'Directory' -force | Out-Null
+          dotnet build -c Release
+          dotnet pack -c Release
+          Expand-Archive -Path .\bin\Release\Werkr.Installers.Wix.CustomActions.*.nupkg .\bin\Release\Werkr.Installers.Wix.CustomActions
+          $Content = [xml](Get-Content -Path 'bin\Release\Werkr.Installers.Wix.CustomActions\Werkr.Installers.Wix.CustomActions.nuspec')
+          Copy-Item -Path '.\bin\Release\net48\Werkr.Installers.Wix.CustomActions.CA.dll' -Destination $LibPath -Verbose
+          @"
+          <?xml $($Content.xml)?>
+          <package xmlns="$($Content.package.xmlns)">
+            <metadata>
+              <id>$($Content.package.metadata.id).CA</id>
+              <version>$($Content.package.metadata.version)</version>
+              <authors>$($Content.package.metadata.authors)</authors>
+              <requireLicenseAcceptance>false</requireLicenseAcceptance>
+              <license type="expression">MIT</license>
+              <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+              <projectUrl>$($Content.package.metadata.projectUrl)</projectUrl>
+              <description>$($Content.package.metadata.description)</description>
+              <repository url="$($Content.package.metadata.repository.url)" branch="$($Content.package.metadata.repository.branch)" commit="$($Content.package.metadata.repository.commit)" />
+              <dependencies>
+                <group targetFramework=".NETFramework4.8" />
+              </dependencies>
+            </metadata>
+          </package>
+          "@ | Out-File '.\Publish\Werkr.Installers.Wix.CustomActions.CA.nuspec'
+          nuget pack 'Publish\Werkr.Installers.Wix.CustomActions.CA.nuspec'
+
+      - name: Publish library to github nuget Feed.
+        shell: pwsh
+        run: |
+          Set-Location './src/Wix'
+          dotnet nuget remove source github
+          dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json'  -n 'github' -u ${{ github.actor }} -p ${{ secrets.PACKAGES_WRITE_KEY }} --store-password-in-clear-text
+          dotnet nuget push 'Werkr.Installers.Wix.CustomActions.CA.*.nupkg' --source 'github' --skip-duplicate

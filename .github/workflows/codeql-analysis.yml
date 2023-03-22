@@ -1,0 +1,59 @@
+name: "CodeQL"
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ main, develop ]
+  schedule:
+    - cron: '20 0 * * 2,5'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: windows-2019
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: GitTools/actions/gitversion/setup@v0.9.15
+      with:
+        versionSpec: '5.x'
+
+    - name: Use dotnet to auth to the github nuget feed.
+      shell: pwsh
+      run: |
+        remove-item -path .\src\Wix\nuget.config -force -verbose
+        dotnet nuget add source 'https://nuget.pkg.github.com/DarkgreyDevelopment/index.json' -n 'github' -u '${{ github.actor }}' -p '${{ secrets.PACKAGES_READ_KEY }}'
+
+    - name: Restore Wix CustomActions Project
+      shell: pwsh
+      run: dotnet restore src\Wix\CustomActions.csproj
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended,security-and-quality
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"

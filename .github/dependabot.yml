@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/src/Wix" # Location of package manifests
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "07:06"
+      timezone: "US/Pacific"
