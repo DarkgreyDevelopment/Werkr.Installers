@@ -12,7 +12,6 @@
     <SelfContained>true</SelfContained>
     <PackageProjectUrl>https://github.com/DarkgreyDevelopment/Werkr.Installers</PackageProjectUrl>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <NoWarn>$(NoWarn);NU5104</NoWarn> <!-- Wix v4 is still in pre-release (rc) status -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,8 +25,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="Werkr.Common.Configuration" Version="0.1.0" />
-    <PackageReference Include="WixToolset.Dtf.CustomAction" Version="4.0.0-rc.4" />
-    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="4.0.0-rc.4" />
+    <PackageReference Include="WixToolset.Dtf.CustomAction" Version="4.0.0" />
+    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
