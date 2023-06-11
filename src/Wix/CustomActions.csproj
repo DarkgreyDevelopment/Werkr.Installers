@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Werkr.Installers.Wix.CustomActions</AssemblyName>
     <PackageId>Werkr.Installers.Wix.CustomActions</PackageId>
@@ -26,7 +26,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="Werkr.Common.Configuration" Version="0.1.0" />
     <PackageReference Include="WixToolset.Dtf.CustomAction" Version="4.0.0" />
-    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="4.0.0" />
+    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="4.0.1" />
   </ItemGroup>
 
   <ItemGroup>
